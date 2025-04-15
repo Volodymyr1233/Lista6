@@ -1,16 +1,9 @@
-# This is a sample Python script.
+from Station import Station
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+def test(name):
+    station1 = Station("DsBialka", "Białka", "Białka", "", 51.197783, 16.11739)
+    print(station1.__repr__())
 
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
-
-
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print_hi('PyCharm')
+    test('PyCharm')
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
