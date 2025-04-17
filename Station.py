@@ -25,3 +25,17 @@ class Station:
         if isinstance(other, Station):
             return self.code == other.code
         return False
+
+if __name__ == "__main__":
+    #__str__ and __repr__ method
+    station1 = Station("123", "Stacja Główna", "Warszawa", "ul. Długa 1", 52.2297, 21.0122)
+    print("--- __str__ method ---")
+    print(station1)
+    print("--- __repr__ method ---")
+    print(repr(station1))
+
+    #__eq__ method
+    print("--- __eq__ method ---")
+    s1 = Station("789", "Stacja 1", "Gdańsk", "ul. Zielona 3", 54.3520, 18.6466)
+    s2 = Station("789", "Stacja 2", "Poznań", "ul. Czerwona 7", 52.4064, 16.9252)
+    print(f"s1 and s2 are the same: {s1 == s2}")
