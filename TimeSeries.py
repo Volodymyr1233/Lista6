@@ -54,3 +54,45 @@ class TimeSeries:
         if numpy.isnan(self.values).all():
             return None
         return float(numpy.nanstd(self.values))
+
+if __name__ == "__main__":
+    dates = [
+        datetime.datetime(2023, 1, 1),
+        datetime.datetime(2023, 1, 2),
+        datetime.datetime(2023, 1, 3),
+        datetime.datetime(2023, 1, 4),
+        datetime.datetime(2023, 1, 5),
+        datetime.datetime(2023, 1, 6),
+        datetime.datetime(2023, 1, 7),
+        datetime.datetime(2023, 1, 8),
+        datetime.datetime(2023, 1, 9),
+        datetime.datetime(2023, 1, 10),
+    ]
+
+    values = [
+        15.0,
+        None,
+        22.0,
+        18.0,
+        25.0,
+        None,
+        30.0,
+        28.0,
+        27.0,
+        26.0
+    ]
+
+    ts_test = TimeSeries("PM10", "12345", "1d", dates, values, "µg/m³")
+
+    print("test_getitem_index:", ts_test[0])
+    print("test_getitem_slice:", ts_test[1:3])
+
+    dt = datetime.date(2023, 1, 3)
+    print("test_getitem_date_exact:", ts_test[dt])
+
+    dt = datetime.date(2022, 12, 31)
+    print("test_getitem_date_not_found:", ts_test[dt])
+
+    print("test_mean:", ts_test.mean)
+    print("test_stddev:", ts_test.stddev)
+
