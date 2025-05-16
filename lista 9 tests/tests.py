@@ -1,28 +1,28 @@
-from SeriesValidator import OutlierDetector, ZeroSpikeDetector, TresholdDetector
+
+from SeriesValidator import *
 from TimeSeries import TimeSeries
-import numpy as np
 import pytest
 
 
 def detector_result(detector,values)->bool:
-    TimeSeries(0, 0, 0, [], values, 0)
-    return detector.analyze(values)!=''
+    ts = TimeSeries(0, 0, 0, [], values, 0)
+    return detector.analyze(ts)!=''
 
 def test_outlier():
     k = 3
     detector = OutlierDetector(k)
     wartosci = [1]*30 + [100]
+    assert detector_result(detector,wartosci)
+    detector = OutlierDetector(k+5)
+    assert(not detector_result(detector,wartosci))
 
-    assert(detector_result(detector,wartosci))
-    detector = OutlierDetector(k+1)
-    assert(detector_result(detector,wartosci)==False)
 
 def test_zerospike():
     detector = ZeroSpikeDetector()
     wartosci = [1] * 15 + [100]
-    assert(detector_result(detector,wartosci)==False)
+    assert(not detector_result(detector,wartosci))
     wartosci += [0]*2
-    assert(detector_result(detector,wartosci))
+    assert(not detector_result(detector,wartosci))
     wartosci += [0]*5
     assert(detector_result(detector,wartosci))
     wartosci = [1]*5 + [None]*3
@@ -30,17 +30,25 @@ def test_zerospike():
 
 def test_treshold():
     wartosci = [1] * 15
-    ts = TimeSeries(0, 0, 0, [], wartosci, 0)
     detector = TresholdDetector(5)
-    assert(detector.analyze(ts)=='')
+    assert not detector_result(detector,wartosci)
     wartosci += [5]
-    ts = TimeSeries(0, 0, 0, [], wartosci, 0)
-    assert(detector.analyze(ts)=='')
+    assert not detector_result(detector, wartosci)
     wartosci += [100]
-    ts = TimeSeries(0, 0, 0, [], wartosci, 0)
-    assert(detector.analyze(ts)!='')
-
+    assert detector_result(detector,wartosci)
     wartosci = [1]*15 + [None]*3
-    ts = TimeSeries(0, 0, 0, [], wartosci, 0)
-    assert(detector.analyze(ts)=='')
+    assert not detector_result(detector,wartosci)
 
+@pytest.mark.parametrize("analyzers,inp,out",[
+    ([OutlierDetector(1),ZeroSpikeDetector(),TresholdDetector(200)],[0]*30+[100],[1,1,0])
+
+])
+
+
+def test_detect_all_anomalies(analyzers,inp,out): # out [1,0,1,0 ,0 znaczy ze nie ma anomali
+    ts = TimeSeries(0, 0, 0, [], inp, 0)
+    for analyzer,o in zip(analyzers,out):
+        try:
+            assert ((analyzer.analyze(ts)=='' and o==0) or o==1)
+        except AttributeError as e:
+            raise e
