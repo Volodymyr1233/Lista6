@@ -1,3 +1,4 @@
+import SeriesValidator
 from TimeSeries import TimeSeries
 from SeriesValidator import OutlierDetector, ZeroSpikeDetector, TresholdDetector
 from datetime import datetime
@@ -21,7 +22,7 @@ if __name__ == "__main__":
     ]
     test_values = [11.4, 18.9, 14.2, 22.7, 19.5, 35.3, None, None, None]
     timeseries_test = TimeSeries("PM25", "STAT001", "24g", test_dates, test_values, "g")
-    analyzers_list = [
+    analyzers_list:list[SeriesValidator.SeriesValidator | SimpleReporter] = [
         OutlierDetector(1),
         ZeroSpikeDetector(),
         TresholdDetector(5),

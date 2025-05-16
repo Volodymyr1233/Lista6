@@ -46,7 +46,7 @@ class ZeroSpikeDetector(SeriesValidator):
         return f"ZeroSpikeDetector anomaly" if (counter_zeroes >= 3 or counter_nonevalues >= 3) else ""
 
 class TresholdDetector(SeriesValidator):
-    def __init__(self, treshold:Number):
+    def __init__(self, treshold:float):
         self.treshold = treshold
     def analyze(self, series: TimeSeries)->str:
         for value in series.values:
@@ -84,7 +84,7 @@ class CompositeValidator(SeriesValidator):
                 raise ValueError(f'Failed to get analyze from {validator}: {e}')
         return b
     def _OR(self,series:TimeSeries)->bool:
-        b = False
+
         for validator in self.validators:
             try:
                 temp = validator.analyze(series)
@@ -94,6 +94,9 @@ class CompositeValidator(SeriesValidator):
             except ValueError as e:
                 raise ValueError(f'Failed to get analyze from {validator}: {e}')
         return b
+
+
+
 
 if __name__ == '__main__':
     from datetime import datetime, date

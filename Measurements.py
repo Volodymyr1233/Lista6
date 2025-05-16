@@ -18,7 +18,7 @@ class Measurements:
     def __init__(self,csv_dir):
         self.csv_dir = csv_dir
         self.__len=0
-        self._dTimeSeries:dict[str,list[tuple[TimeSeries,str]]] | dict[str,[TimeSeries]] = dict() #[code,[TimeSeries]] or [code,[(preTimeSeries,path,index)]]
+        self._dTimeSeries:dict[str,list[tuple[TimeSeries,str,int]] | [TimeSeries]] = dict() #[code,[TimeSeries]] or [code,[(preTimeSeries,path,index)]]
         self._preload() #laduje TimeSerie leniwie
     def __len__(self):
         return self.__len
@@ -80,8 +80,8 @@ class Measurements:
     def _full_load_TimeSeries(self,s:TimeSeries,path:str,index:int)->TimeSeries:
         """:returns Full Loaded TimeSerie"""
         reader = csv.reader(open(path, "r", encoding="utf-8"))
-        times = []
-        values = []
+        times:list[str | datetime] = []
+        values:list[str | float] = []
         for i, row in enumerate(reader):
             if i < 6:
                 continue
@@ -115,7 +115,7 @@ class Measurements:
                         else:
                             result.append(ts)
         return result
-    def get_by_station(self,station_code: str) -> list[TimeSeries]:
+    def get_by_station(self,station_code: str) -> list[tuple[TimeSeries,str,int]] | list[TimeSeries]:
         if station_code in self._dTimeSeries:
             self._full_load_serie(station_code)
             return self._dTimeSeries[station_code]
@@ -142,13 +142,15 @@ class Measurements:
             for code, items in self._dTimeSeries.items():
                 for item in items:
                     for v in validators:
-                        a = v.analyze(item)
+                        a = self._analyze(v,item)#v.analyze(item)
                         if a != '':
                             if not code in result:
                                 result[code] = [a]
                             else:
                                 result[code].append(a)
         return result
+    def _analyze(self,validator:SeriesValidator,ts:TimeSeries | tuple[TimeSeries, str, int])->str:
+        return validator.analyze(ts) if isinstance(ts,TimeSeries) else ''
     def _validate_path(self,path:str)->bool:
         return os.path.exists(path) and os.access(path, os.R_OK) and os.path.isfile(path) and path.lower().endswith(".csv")
     def _get_features_measure_name(self, csv_name:str)->tuple | None:
