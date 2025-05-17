@@ -7,7 +7,7 @@ from TimeSeries import TimeSeries
 
 class SeriesValidator(abc.ABC):
     @abc.abstractmethod
-    def analyze(self, series:TimeSeries)->str:
+    def analyze(self, series:TimeSeries | tuple[TimeSeries, str, int]) ->str:
         pass
 
 
@@ -16,13 +16,13 @@ class SeriesValidator(abc.ABC):
 class OutlierDetector(SeriesValidator):
     """OutlierDetector, która wykrywa wartości oddalone o więcej niż k odchyleń
 standardowych od średniej, gdzie k jest parametrem klasy"""
-    def __init__(self, k:int):
-        if k <=0:
+    def __init__(self, k: int) -> None:
+        if k <= 0:
             raise ValueError("k must be positive")
-        self.k = k
+        self.k: int = k
     def analyze(self, series: TimeSeries)->str:
-        mean  = series.mean
-        std = series.stddev
+        mean: float = series.mean
+        std: float = series.stddev
 
         if mean is None or std is None:
             raise ValueError("Cannot get mean/stddev for series")
@@ -36,8 +36,8 @@ standardowych od średniej, gdzie k jest parametrem klasy"""
 class ZeroSpikeDetector(SeriesValidator):
 
     def analyze(self, series: TimeSeries) -> str:
-        counter_zeroes = 0
-        counter_nonevalues = 0
+        counter_zeroes: int = 0
+        counter_nonevalues: int = 0
         for value in series.values:
             if math.isnan(value):
                 counter_nonevalues +=1
@@ -46,8 +46,8 @@ class ZeroSpikeDetector(SeriesValidator):
         return f"ZeroSpikeDetector anomaly" if (counter_zeroes >= 3 or counter_nonevalues >= 3) else ""
 
 class TresholdDetector(SeriesValidator):
-    def __init__(self, treshold:float):
-        self.treshold = treshold
+    def __init__(self, treshold:float) -> None:
+        self.treshold: float = treshold
     def analyze(self, series: TimeSeries)->str:
         for value in series.values:
             if math.isnan(value):
@@ -57,28 +57,28 @@ class TresholdDetector(SeriesValidator):
         return ""
 
 class CompositeValidator(SeriesValidator):
-    def __init__(self, *validators:SeriesValidator,mode:str='OR'):
+    def __init__(self, *validators: SeriesValidator,mode: str='OR') -> None:
         """modes: OR AND"""
         if mode not in ('OR','AND'):
             raise ValueError("Invalid mode")
-        self.validators = validators
-        self.mode = mode
+        self.validators: tuple[SeriesValidator] = validators
+        self.mode: str = mode
 
     def analyze(self, series: TimeSeries) -> str:
         match(self.mode):
             case 'OR':
-                b= self._OR(series)
+                b: bool= self._OR(series)
             case 'AND':
-                b = self._AND(series)
+                b: bool = self._AND(series)
         return "Composite anomaly" if b else ""
 
     def _AND(self,series:TimeSeries)->bool:
-        b = True
+        b: bool = True
         for validator in self.validators:
             try:
-                temp = validator.analyze(series)
+                temp: str = validator.analyze(series)
                 if temp == "":
-                    b = False
+                    b: bool = False
                     break
             except ValueError as e:
                 raise ValueError(f'Failed to get analyze from {validator}: {e}')
@@ -87,9 +87,9 @@ class CompositeValidator(SeriesValidator):
 
         for validator in self.validators:
             try:
-                temp = validator.analyze(series)
+                temp:str = validator.analyze(series)
                 if temp != "":
-                    b = True
+                    b: bool = True
                     break
             except ValueError as e:
                 raise ValueError(f'Failed to get analyze from {validator}: {e}')
@@ -100,7 +100,7 @@ class CompositeValidator(SeriesValidator):
 
 if __name__ == '__main__':
     from datetime import datetime, date
-    daty = [
+    daty: list[datetime] = [
         datetime(2024, 1, 1, 8),
         datetime(2024, 1, 1, 9),
         datetime(2024, 1, 1, 10),
@@ -113,9 +113,9 @@ if __name__ == '__main__':
         datetime(2024, 1, 2, 17)
     ]
 
-    wartosci = [15.2, 16.8, None, 18.0,15.0,9999.0,12.0,0,0,0]
+    wartosci: list[float] = [15.2, 16.8, None, 18.0,15.0,9999.0,12.0,0,0,0]
 
-    ts = TimeSeries(0, 0, 0, daty, wartosci, 0)
+    ts: TimeSeries = TimeSeries('0', '0', '0', daty, wartosci, '0')
 
     print('-',OutlierDetector(1).analyze(ts))#Powinno być OutlierDetector
     print('-',OutlierDetector(3).analyze(ts))#Nic nie powinno byc

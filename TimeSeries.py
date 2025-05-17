@@ -1,17 +1,20 @@
 import datetime
 import numpy
+from typing import Union
+
+from numpy import ndarray
 
 
 class TimeSeries:
-    def __init__(self, quantity, code, frequency, timestamps, values, unit):
-        self.quantity = quantity
-        self.code = code
-        self.frequency = frequency
-        self.timestamps = timestamps
-        self.values = numpy.array(values, dtype=float)
-        self.unit = unit
+    def __init__(self, quantity: str, code: str, frequency: str, timestamps: list[datetime.datetime], values: list[float], unit: str) -> None:
+        self.quantity: str = quantity
+        self.code: str = code
+        self.frequency: str = frequency
+        self.timestamps: list[datetime.datetime] = timestamps
+        self.values: ndarray[float] = numpy.array(values, dtype=float)
+        self.unit: str = unit
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: int | slice | datetime.datetime | datetime.date) -> list[tuple[datetime.datetime, float]] | tuple[datetime.datetime, float] | float | ndarray[float]:
         if isinstance(item, int):
             try:
                 return self.timestamps[item], self.values[item]
@@ -39,18 +42,20 @@ class TimeSeries:
             for index in index_list:
                 result_list.append(self.values[index])
 
+            if (len(result_list) == 0):
+                raise KeyError("Nie ma danych")
             return result_list
         else:
             raise KeyError("Your key is wrong")
 
     @property
-    def mean(self):
+    def mean(self) -> float | None:
         if numpy.isnan(self.values).all():
             return None
         return float(numpy.nanmean(self.values))
 
     @property
-    def stddev(self):
+    def stddev(self) -> float | None:
         if numpy.isnan(self.values).all():
             return None
         return float(numpy.nanstd(self.values))

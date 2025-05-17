@@ -1,5 +1,5 @@
 class Station:
-    def __init__(self, code, title, city, address, latitude, longitude):
+    def __init__(self, code: str, title: str, city: str, address:str, latitude:float, longitude:float) -> None:
         self.code = code
         self.title = title
         self.city = city
@@ -7,7 +7,7 @@ class Station:
         self.latitude = latitude
         self.longitude = longitude
 
-    def __str__(self):
+    def __str__(self) -> str:
         code_string = f"Kod stacji: {self.code}"
         title_string = f"Nazwa stacji: {self.title}"
         city_string = f"Misto: {self.city}"
@@ -18,10 +18,10 @@ class Station:
         result_string = f"{code_string}\n{title_string}\n{city_string}\n{address_string}\n{latitude_string}\n{longitude_string}"
         return result_string
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Station('{self.code}', '{self.title}', '{self.city}', '{self.address}', {self.latitude}, {self.longitude})"
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         if isinstance(other, Station):
             return self.code == other.code
         return False
